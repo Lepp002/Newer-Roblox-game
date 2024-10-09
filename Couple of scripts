@@ -1,0 +1,121 @@
+*Lava Stones Script*
+
+
+local lavaStones = script.Parent --get access to all components
+
+lavaStones.Touched:Connect(function(other) --detects if a part is touched
+	if other.Parent:FindFirstChild("Humanoid") then --detects if it a humanoid who is touching
+		other.Parent.Humanoid.Health = 0 --decreases the life to 0 (kills the player)
+	end
+end)
+
+
+
+*Lava script*
+
+
+
+local lavaModel = script.Parent --get access to all components
+local lavaFloor = lavaModel.LavaFloor --get access to the lava floor
+
+lavaFloor.Touched:Connect(function(other) --detects if a part is touched
+	if other.Parent:FindFirstChild("Humanoid") then --detects if it a humanoid who is touching
+		other.Parent.Humanoid.Health = 0 --decreases the life to 0 (kills the player)
+	end
+end)
+
+
+
+*Door Sound Script*
+
+
+
+local doorScript = script.Parent --get access to all components
+local doorSound = doorScript.door_open --to get access to the sound component
+local doorSensor = doorScript.SoundSensor --to get access to the sensor component
+local playOnce = false --to play the sound only once using boolean
+
+doorSensor.Touched:Connect(function(other) --detects if a part is touched
+	if other.Parent:FindFirstChild("Humanoid") and not playOnce then --detects if it a humanoid who is touching and if it has been touched before
+		doorSound:Play() --plays the door sound
+		playOnce = true --sets boolean to true so it doesn't play again
+	end
+end)
+
+
+
+*Jumping boost script with sound*
+
+
+
+local volume = script.Parent --get access to all components
+local jumpSound = volume.JumpSFX --to get access to the sound component
+
+local function onTouched(other) --detects if a part is touched
+	local impulse = Vector3.new(0, 250, 250) --gives the player vertical and slight forward movement
+	local character = other.Parent --gets the character
+	local humanoid = character:FindFirstChildWhichIsA("Humanoid") --gets the humanoid
+	if humanoid and other.Name == "LeftFoot" then --checks if the humanoid exists and if the part is the left foot  
+		print("liftoff") -- to check if the script is working to this part (optional)
+		jumpSound:Play() --plays the jump sound
+		volume.Velocity = impulse --makes the player move by the set Vector
+		wait(1)	--waits a second not to boost more than once
+	end
+end
+
+volume.Touched:Connect(onTouched) --connects the function to the Touched event of the part
+
+
+
+*Sliding door script with sound*  
+
+
+
+local TweenService = game:GetService("TweenService") --to get access to Tween Services
+local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0, false, 0) --To move the door smoothly
+
+
+local slidingDoor = script.Parent --to get access to all of the components
+local leftDoor = slidingDoor.LeftDoor --to access the left door
+local rightDoor = slidingDoor.RightDoor --to access the right door
+local sensor = slidingDoor.Sensor --to detect when a player is near the door
+local light = slidingDoor.Light --to change the color of the light
+local doorSound = slidingDoor.AutomaticDoorOpen --to play a sound when the door moves
+
+
+local leftDoorCloseTween = TweenService:Create(leftDoor, tweenInfo, {Position = Vector3.new(-247, 4.5, 5.5)}) --to say where is the closed position on the left door
+local rightDoorCloseTween = TweenService:Create(rightDoor, tweenInfo, {Position = Vector3.new(-247, 4.5, 0.5)}) --to say where is the closed position on the right door
+
+local leftDoorOpenTween = TweenService:Create(leftDoor, tweenInfo, {Position = Vector3.new(-247, 4.5, 10.25)}) --to say where is the open position on the left door
+local rightDoorOpenTween = TweenService:Create(rightDoor, tweenInfo, {Position = Vector3.new(-247, 4.5, -4.25)}) --to say where is the open position on the right door
+
+local isOpen = false --to create a boolean to check if the door is open or closed
+
+
+sensor.Touched:Connect(function(part) --to see if someone touched the sensor
+	if part.Parent:FindFirstChild("Humanoid")then --to see if the touching was done by the player
+		if not isOpen then --if it is closed
+
+			isOpen = true --make the boolean true so the script cannot run again
+			
+			light.Color = Color3.fromRGB(0, 255, 0) --change the light color to green
+
+			leftDoorOpenTween:Play() --open the left door
+			rightDoorOpenTween:Play() --open the right door
+			doorSound:Play() --Play the sliding door sound
+
+			wait(3)
+			
+			light.Color = Color3.fromRGB(255, 0, 0) --change the light color to red
+
+			leftDoorCloseTween:Play() --close the left door
+			rightDoorCloseTween:Play() --close the right door
+			doorSound:Play() --Play the sliding door sound
+
+			isOpen = false --make the boolean false so the script can run again
+
+		end
+
+	end
+	
+end)
